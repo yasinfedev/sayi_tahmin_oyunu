@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sayı Tahmin Oyunu</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -23,6 +23,19 @@
       overflow-y: auto;
       font-size: 1rem;
     }
+    .shake {
+      animation: shake 0.3s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+    .invalid-input {
+      border: 2px solid red !important;
+    }
   </style>
 </head>
 <body class="bg-light text-center p-3">
@@ -30,23 +43,28 @@
   <div class="container">
     <h1 class="mb-4">🎯 Sayı Tahmin Oyunu</h1>
 
-    <!-- Aralık belirleme -->
     <div class="row mb-3 gx-2">
       <div class="col-6 col-md-3">
-        <input type="number" id="minValue" class="form-control" placeholder="Min" value="1">
+        <input type="number" inputmode="numeric" pattern="[0-9]*" id="minValue" class="form-control" placeholder="Min" value="1">
       </div>
       <div class="col-6 col-md-3">
-        <input type="number" id="maxValue" class="form-control" placeholder="Max" value="100">
+        <input type="number" inputmode="numeric" pattern="[0-9]*" id="maxValue" class="form-control" placeholder="Max" value="100">
       </div>
       <div class="col-12 col-md-6 mt-2 mt-md-0">
         <button class="btn btn-primary w-100" onclick="startGame()">🎮 Oyunu Başlat</button>
       </div>
     </div>
 
-    <!-- Oyun alanı -->
     <div id="gameArea" class="d-none">
       <p class="lead">Tahmininizi girin:</p>
-      <input type="number" id="guessInput" class="form-control w-75 mx-auto mb-2" placeholder="Tahmin">
+      <input 
+        type="number" 
+        id="guessInput" 
+        class="form-control w-75 mx-auto mb-2" 
+        placeholder="Tahmin" 
+        inputmode="numeric" 
+        pattern="[0-9]*" 
+      />
       <button class="btn btn-success" onclick="checkGuess()">✅ Tahmin Et</button>
 
       <div id="feedback" class="mt-4"></div>
@@ -60,10 +78,8 @@
     </div>
   </div>
 
-  <!-- Havai fişekler -->
   <canvas id="fireworksCanvas" class="fireworks"></canvas>
 
-  <!-- Kütüphaneler -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.1.0/dist/fireworks.min.js"></script>
 
@@ -78,30 +94,44 @@
     function startGame() {
       const min = parseInt(document.getElementById("minValue").value);
       const max = parseInt(document.getElementById("maxValue").value);
+
       if (isNaN(min) || isNaN(max) || min >= max) {
         alert("Lütfen geçerli bir minimum ve maksimum değer girin.");
         return;
       }
 
       randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-      console.log("Tahmin edilecek sayı:", randomNumber); // test için
-      guesses = [];
+      console.log("Tahmin edilecek sayı:", randomNumber);
 
-      // Arayüz güncelle
+      guesses = [];
       document.getElementById("gameArea").classList.remove("d-none");
       document.getElementById("restartBtn").classList.add("d-none");
       feedback.innerHTML = "";
       guessInput.value = "";
       previousGuessesList.innerHTML = "";
       fireworks.stop();
+
+      guessInput.setAttribute("min", min);
+      guessInput.setAttribute("max", max);
+      guessInput.classList.remove("invalid-input");
     }
 
     function checkGuess() {
       const guess = parseInt(guessInput.value);
-      if (isNaN(guess)) {
-        feedback.innerHTML = "<div class='text-danger'>Lütfen bir sayı girin!</div>";
+      const min = parseInt(document.getElementById("minValue").value);
+      const max = parseInt(document.getElementById("maxValue").value);
+
+      if (isNaN(guess) || guess < min || guess > max) {
+        feedback.innerHTML = `<div class='text-danger'>Lütfen ${min} ile ${max} arasında bir sayı girin!</div>`;
+        guessInput.classList.add("invalid-input", "shake");
+
+        setTimeout(() => {
+          guessInput.classList.remove("shake");
+        }, 300);
         return;
       }
+
+      guessInput.classList.remove("invalid-input");
 
       guesses.push(guess);
       const listItem = document.createElement("li");
