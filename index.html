@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sayı Tahmin Oyunu</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .icon {
+      font-size: 4rem;
+      margin: 1rem;
+    }
+    .fireworks {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body class="bg-light text-center p-4">
+
+  <div class="container">
+    <h1 class="mb-4">🎯 Sayı Tahmin Oyunu</h1>
+
+    <div class="row mb-3">
+      <div class="col">
+        <input type="number" id="minValue" class="form-control" placeholder="Minimum Değer" value="1">
+      </div>
+      <div class="col">
+        <input type="number" id="maxValue" class="form-control" placeholder="Maksimum Değer" value="100">
+      </div>
+      <div class="col">
+        <button class="btn btn-primary" onclick="startGame()">Oyunu Başlat</button>
+      </div>
+    </div>
+
+    <div id="gameArea" class="d-none">
+      <p class="lead">Tahmininizi girin:</p>
+      <input type="number" id="guessInput" class="form-control w-50 mx-auto" placeholder="Tahmin">
+      <button class="btn btn-success mt-3" onclick="checkGuess()">Tahmin Et</button>
+
+      <div id="feedback" class="mt-4"></div>
+      <button id="restartBtn" class="btn btn-warning mt-4 d-none" onclick="startGame()">Tekrar Oyna</button>
+    </div>
+  </div>
+
+  <canvas id="fireworksCanvas" class="fireworks"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.1.0/dist/fireworks.min.js"></script>
+
+  <script>
+    let randomNumber;
+    const feedback = document.getElementById("feedback");
+    const fireworks = new Fireworks.default(document.getElementById("fireworksCanvas"));
+
+    function startGame() {
+      const min = parseInt(document.getElementById("minValue").value);
+      const max = parseInt(document.getElementById("maxValue").value);
+      if (isNaN(min) || isNaN(max) || min >= max) {
+        alert("Lütfen geçerli bir minimum ve maksimum değer girin.");
+        return;
+      }
+
+      randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+      console.log("Tahmin edilecek sayı:", randomNumber); // test için
+
+      document.getElementById("gameArea").classList.remove("d-none");
+      document.getElementById("restartBtn").classList.add("d-none");
+      document.getElementById("guessInput").value = "";
+      feedback.innerHTML = "";
+      fireworks.stop();
+    }
+
+    function checkGuess() {
+      const guess = parseInt(document.getElementById("guessInput").value);
+      if (isNaN(guess)) {
+        feedback.innerHTML = "<div class='text-danger'>Lütfen bir sayı girin!</div>";
+        return;
+      }
+
+      if (guess < randomNumber) {
+        feedback.innerHTML = "<div class='text-primary icon'>👍<br>Arttır!</div>";
+      } else if (guess > randomNumber) {
+        feedback.innerHTML = "<div class='text-warning icon'>👎<br>Azalt!</div>";
+      } else {
+        feedback.innerHTML = `<div class="text-success icon">🎉<br>Bildiniz! Sayımız ${randomNumber} idi.</div>`;
+        document.getElementById("restartBtn").classList.remove("d-none");
+        fireworks.start();
+      }
+    }
+  </script>
+</body>
+</html>
