@@ -7,8 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .icon {
-      font-size: 4rem;
-      margin: 1rem;
+      font-size: 3rem;
     }
     .fireworks {
       position: fixed;
@@ -19,43 +18,61 @@
       pointer-events: none;
       z-index: 9999;
     }
+    #previousGuesses {
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 1rem;
+    }
   </style>
 </head>
-<body class="bg-light text-center p-4">
+<body class="bg-light text-center p-3">
 
   <div class="container">
     <h1 class="mb-4">🎯 Sayı Tahmin Oyunu</h1>
 
-    <div class="row mb-3">
-      <div class="col">
-        <input type="number" id="minValue" class="form-control" placeholder="Minimum Değer" value="1">
+    <!-- Aralık belirleme -->
+    <div class="row mb-3 gx-2">
+      <div class="col-6 col-md-3">
+        <input type="number" id="minValue" class="form-control" placeholder="Min" value="1">
       </div>
-      <div class="col">
-        <input type="number" id="maxValue" class="form-control" placeholder="Maksimum Değer" value="100">
+      <div class="col-6 col-md-3">
+        <input type="number" id="maxValue" class="form-control" placeholder="Max" value="100">
       </div>
-      <div class="col">
-        <button class="btn btn-primary" onclick="startGame()">Oyunu Başlat</button>
+      <div class="col-12 col-md-6 mt-2 mt-md-0">
+        <button class="btn btn-primary w-100" onclick="startGame()">🎮 Oyunu Başlat</button>
       </div>
     </div>
 
+    <!-- Oyun alanı -->
     <div id="gameArea" class="d-none">
       <p class="lead">Tahmininizi girin:</p>
-      <input type="number" id="guessInput" class="form-control w-50 mx-auto" placeholder="Tahmin">
-      <button class="btn btn-success mt-3" onclick="checkGuess()">Tahmin Et</button>
+      <input type="number" id="guessInput" class="form-control w-75 mx-auto mb-2" placeholder="Tahmin">
+      <button class="btn btn-success" onclick="checkGuess()">✅ Tahmin Et</button>
 
       <div id="feedback" class="mt-4"></div>
-      <button id="restartBtn" class="btn btn-warning mt-4 d-none" onclick="startGame()">Tekrar Oyna</button>
+
+      <div class="mt-4">
+        <h5>📜 Önceki Tahminler</h5>
+        <ul id="previousGuesses" class="list-group w-75 mx-auto"></ul>
+      </div>
+
+      <button id="restartBtn" class="btn btn-warning mt-4 d-none" onclick="startGame()">🔁 Tekrar Oyna</button>
     </div>
   </div>
 
+  <!-- Havai fişekler -->
   <canvas id="fireworksCanvas" class="fireworks"></canvas>
 
+  <!-- Kütüphaneler -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.1.0/dist/fireworks.min.js"></script>
 
   <script>
     let randomNumber;
+    let guesses = [];
     const feedback = document.getElementById("feedback");
+    const guessInput = document.getElementById("guessInput");
+    const previousGuessesList = document.getElementById("previousGuesses");
     const fireworks = new Fireworks.default(document.getElementById("fireworksCanvas"));
 
     function startGame() {
@@ -68,20 +85,29 @@
 
       randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
       console.log("Tahmin edilecek sayı:", randomNumber); // test için
+      guesses = [];
 
+      // Arayüz güncelle
       document.getElementById("gameArea").classList.remove("d-none");
       document.getElementById("restartBtn").classList.add("d-none");
-      document.getElementById("guessInput").value = "";
       feedback.innerHTML = "";
+      guessInput.value = "";
+      previousGuessesList.innerHTML = "";
       fireworks.stop();
     }
 
     function checkGuess() {
-      const guess = parseInt(document.getElementById("guessInput").value);
+      const guess = parseInt(guessInput.value);
       if (isNaN(guess)) {
         feedback.innerHTML = "<div class='text-danger'>Lütfen bir sayı girin!</div>";
         return;
       }
+
+      guesses.push(guess);
+      const listItem = document.createElement("li");
+      listItem.className = "list-group-item";
+      listItem.textContent = guess;
+      previousGuessesList.appendChild(listItem);
 
       if (guess < randomNumber) {
         feedback.innerHTML = "<div class='text-primary icon'>👍<br>Arttır!</div>";
@@ -92,6 +118,9 @@
         document.getElementById("restartBtn").classList.remove("d-none");
         fireworks.start();
       }
+
+      guessInput.value = "";
+      guessInput.focus();
     }
   </script>
 </body>
